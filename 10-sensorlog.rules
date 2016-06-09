@@ -1,0 +1,2 @@
+KERNEL=="spidev0.[0-9]", SUBSYSTEM=="spidev", SUBSYSTEMS=="spi", GROUP="uucp", MODE="0660"
+KERNEL=="i2c-[0-9]", SUBSYSTEM=="i2c-dev", SUBSYSTEMS=="i2c", GROUP=="uucp", MODE="0660"
