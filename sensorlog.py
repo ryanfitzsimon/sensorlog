@@ -8,13 +8,14 @@ import time
 import threading
 import signal
 import datetime
+import smbus
+import serial
 
 opc_cols = ['Bin {0}'.format(i) for i in range(0,16)]
 opc_cols.extend(['Bin{0} MToF'.format(i) for i in range(1,2,8)])
 opc_cols.extend(['PM1', 'PM10', 'PM2.5', 'SFR', 'Sampling Period'])
 
-def usage():
-    print('{0} [OPTIONS]'.format(__file__))
+I2C_ADDR = 0x1e
 
 class StoppableThread(threading.Thread):
     def __init__(self):
@@ -24,7 +25,7 @@ class StoppableThread(threading.Thread):
     def stop(self):
         self._stopevent.set()
 
-class OPC_Thread(StoppableThread):
+class Log_Thread(StoppableThread):
     def __init__(self, period, logfile, verbose):
         super().__init__()
         self.period = period
@@ -38,6 +39,8 @@ class OPC_Thread(StoppableThread):
         spi.mode = 1
         spi.max_speed_hz = 500000
 
+        self.mag = smbus.SMBus(1)
+        self.gps = serial.Serial('/dev/ttyAMA0', timeout=0)
         self.alphasense = opc.OPCN2(spi)
 
         # Turn the opc ON
@@ -45,6 +48,12 @@ class OPC_Thread(StoppableThread):
 
     def logreading(self, append=True):
         hist = self.alphasense.histogram()
+
+        # Compass Read Example
+        print(self.mag.read_byte_data(I2C_ADDR, 1))
+
+        # GPS Read Example
+        print(self.gps.read(1))
 
         if append:
             f = open(self.logfile, 'a')
@@ -93,15 +102,15 @@ def main():
     parser.add_argument('-v', action='store_true', help='print logged data to stdout')
 
     args = parser.parse_args()
-    opcthread = OPC_Thread(args.t, args.l, args.v)
+    logthread = Log_Thread(args.t, args.l, args.v)
 
     try:
-        opcthread.start()
+        logthread.start()
         signal.pause()
     except KeyboardInterrupt:
         print('\nExiting...')
-        opcthread.stop()
-        opcthread.join()
+        logthread.stop()
+        logthread.join()
         sys.exit(0)
 
 if __name__ == "__main__":

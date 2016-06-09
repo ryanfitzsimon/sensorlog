@@ -1,3 +1,4 @@
 spidev
 py-opc
-
+pyserial
+smbus-cffi
