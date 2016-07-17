@@ -50,10 +50,10 @@ class Log_Thread(StoppableThread):
         hist = self.alphasense.histogram()
 
         # Compass Read Example
-        print(self.mag.read_byte_data(I2C_ADDR, 1))
+#        print(self.mag.read_byte_data(I2C_ADDR, 1))
 
         # GPS Read Example
-        print(self.gps.read(1))
+#        print(self.gps.read(1))
 
         if append:
             f = open(self.logfile, 'a')
