@@ -11,11 +11,12 @@ import datetime
 import smbus
 import serial
 
-opc_cols = ['Bin {0}'.format(i) for i in range(0,16)]
-opc_cols.extend(['Bin{0} MToF'.format(i) for i in range(1,2,8)])
+opc_cols = ['Bin {0}'.format(i) for i in range(0, 16)]
+opc_cols.extend(['Bin{0} MToF'.format(i) for i in range(1, 2, 8)])
 opc_cols.extend(['PM1', 'PM10', 'PM2.5', 'SFR', 'Sampling Period'])
 
 I2C_ADDR = 0x1e
+
 
 class StoppableThread(threading.Thread):
     def __init__(self):
@@ -25,6 +26,7 @@ class StoppableThread(threading.Thread):
     def stop(self):
         self._stopevent.set()
 
+
 class Log_Thread(StoppableThread):
     def __init__(self, period, logfile, verbose):
         super().__init__()
@@ -32,7 +34,8 @@ class Log_Thread(StoppableThread):
         self.logfile = logfile
         self.verbose = verbose
 
-        print('Logging to {0} every {1} seconds'.format(self.logfile, self.period))
+        print('Logging to {0} every {1} seconds'
+              .format(self.logfile, self.period))
 
         spi = spidev.SpiDev()
         spi.open(0, 0)
@@ -95,11 +98,14 @@ class Log_Thread(StoppableThread):
         self.alphasense.off()
         return
 
+
 def main():
-    parser = argparse.ArgumentParser(description='Log OPC readings to a csv file.')
+    parser = argparse.ArgumentParser(
+          description='Log OPC readings to csv file.')
     parser.add_argument('-l', metavar='logfile', default='opc-log.csv')
     parser.add_argument('-t', metavar='period', type=int, default=20)
-    parser.add_argument('-v', action='store_true', help='print logged data to stdout')
+    parser.add_argument('-v', action='store_true',
+                        help='print logged data to stdout')
 
     args = parser.parse_args()
     logthread = Log_Thread(args.t, args.l, args.v)
